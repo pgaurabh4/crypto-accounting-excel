@@ -1,8 +1,9 @@
 # crypto-accounting-excel
 
 Generates **`GravityLedger.xlsx`** — a single-file crypto double-entry accounting
-workbook driven by **SQL + VBA macros** — plus a one-double-click builder that
-turns it into the macro-enabled `GravityLedger.xlsm`.
+workbook whose entire engine is **VBA macros** (runs on just Excel — no database,
+add-in, or external provider) — plus a one-double-click builder that turns it
+into the macro-enabled `GravityLedger.xlsm`.
 
 It is a faithful Excel port of the Rust ledger engine in
 [`pgaurabh4/crypto-accounting`](https://github.com/pgaurabh4/crypto-accounting)
@@ -26,11 +27,12 @@ multi-entity reporting under IFRS, for a spot-only crypto market maker.
 - **Transfers** — move a coin between exchanges at cost (no P&L).
 - **BankStatement** — cash in/out; `counter_account` routes it (`EQ:CAPITAL`, `LIAB:LOAN`, `INC:*`, `EXP:*`, …).
 
-Everything else is **derived on RUN ALL**: the macros post journals + FIFO lots,
-then **SQL (ADODB / ACE OLEDB) `GROUP BY`/`JOIN`** builds `TrialBalance`,
-`Balances`, `ExchangeBalances` (balances by coin per exchange), `Positions`,
-`Loans`, `PnL`, `IncomeStatement`, `BalanceSheet`, and `Reconciliation`. If the
-ACE provider is missing the engine falls back to equivalent in-VBA aggregation.
+Everything else is **derived on RUN ALL**, entirely in VBA: the macros post
+journals + FIFO lots, then aggregate `TrialBalance`, `Balances`,
+`ExchangeBalances` (balances by coin per exchange), `Positions`, `Loans`, `PnL`,
+`IncomeStatement`, `BalanceSheet`, and `Reconciliation`. No database or provider
+is required. (An optional SQL/ACE reporting path is included behind
+`USE_SQL = False` in `modReports` for anyone who wants it.)
 
 ## Build
 

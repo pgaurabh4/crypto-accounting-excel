@@ -2,21 +2,27 @@ Attribute VB_Name = "modReports"
 Option Explicit
 Public gReportEngine As String   ' "SQL (ACE OLEDB)" or "VBA fallback"
 
-' Build every report sheet. Tries SQL via ADODB/ACE over the saved workbook;
-' on any provider error, falls back to equivalent in-VBA aggregation so RunAll
-' always completes end to end.
+' Build every report sheet. PURE VBA by default — the whole engine runs end to
+' end inside Excel with no external provider, database, or add-in required.
+'
+' (Optional: an equivalent SQL implementation lives in Reports_Sql below. To use
+'  it instead, set USE_SQL=True; it needs the Microsoft.ACE.OLEDB provider. It is
+'  off by default precisely so the workbook is 100% self-contained VBA.)
+Public Const USE_SQL As Boolean = False
+
 Public Sub Reports_BuildAll()
-    Dim cn As Object
-    On Error GoTo useFallback
-    Set cn = CreateObject("ADODB.Connection")
-    cn.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & ThisWorkbook.FullName & _
-            ";Extended Properties=""Excel 12.0 Xml;HDR=YES;IMEX=1"";"
-    gReportEngine = "SQL (ACE OLEDB)"
-    Reports_Sql cn
-    cn.Close
-    Exit Sub
+    If USE_SQL Then
+        On Error GoTo useFallback
+        Dim cn As Object: Set cn = CreateObject("ADODB.Connection")
+        cn.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & ThisWorkbook.FullName & _
+                ";Extended Properties=""Excel 12.0 Xml;HDR=YES;IMEX=1"";"
+        gReportEngine = "SQL (ACE OLEDB)"
+        Reports_Sql cn
+        cn.Close
+        Exit Sub
+    End If
 useFallback:
-    gReportEngine = "VBA fallback (ACE provider not found)"
+    gReportEngine = "VBA (pure — no external provider)"
     Reports_Vba
 End Sub
 

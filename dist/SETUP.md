@@ -24,12 +24,16 @@ written by Excel itself, pick whichever path below fits you.
 3. Back in Excel: **Developer > Insert > Button**, assign it to macro `RunAll`.
 4. Click the button. Done.
 
-## How "uses SQL" works
-On RUN ALL the macros post the double-entry journals and FIFO lots, then open an
-**ADODB** connection (`Microsoft.ACE.OLEDB.12.0`) against the workbook itself and
-run `GROUP BY` / `JOIN` SQL to build the reports. If the ACE provider is not
-installed, the engine automatically falls back to equivalent in-VBA aggregation
-so RUN ALL still completes — the popup tells you which path ran.
+## 100% VBA — runs on just Excel
+The entire engine is VBA macros. On RUN ALL it posts the double-entry journals
+and FIFO lots, aggregates every report, and reconciles the bank lines — all in
+VBA, with **no database, no add-in, and no external provider** required. Nothing
+to install beyond Excel itself.
+
+(An optional SQL implementation of the reporting layer is included in
+`modReports` behind `USE_SQL = False`; flip it to `True` only if you specifically
+want the reports computed via the `Microsoft.ACE.OLEDB` provider. It is off by
+default so the workbook stays self-contained.)
 
 ## Verifying it matches the Rust engine
 With the shipped demo, entity **BVI** must show: realized **7497.5**, unrealized

@@ -28,9 +28,9 @@ Public Sub RunAll()
     Engine_RevalueAll       ' period-end mark-to-market (last price or Marks override)
     Engine_DumpFacts        ' write ChartOfAccounts/Journal/JournalLines/Lots
 
-    ThisWorkbook.Save       ' ACE OLEDB reads the file on disk
-    Reports_BuildAll        ' SQL group-by -> every report sheet
+    Reports_BuildAll        ' pure-VBA aggregation -> every report sheet
     Recon_Build             ' match BankStatement lines to posted cash journals
+    ThisWorkbook.Save       ' persist the rebuilt workbook
 
     Application.Calculation = xlCalculationAutomatic
     Application.ScreenUpdating = True

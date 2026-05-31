@@ -82,7 +82,7 @@ fn build_sheets() -> Vec<Sheet> {
         t("You edit ONLY"),
         t("OpeningBalances, Trades, Transfers, BankStatement. Everything else is derived."),
     ]);
-    rd.row(vec![t("To rebuild"), t("Click the RUN ALL button (added by Add-Macros.vbs). Macros post the journals + FIFO lots; SQL (ADODB/ACE) builds every report.")]);
+    rd.row(vec![t("To rebuild"), t("Click the RUN ALL button (added by Add-Macros.vbs). 100% VBA macros, end to end — posts journals + FIFO lots, builds every report, reconciles bank lines. Needs only Excel; no database or add-in.")]);
     rd.row(vec![e()]);
     rd.header(header(&["Input sheet", "Columns / meaning"]));
     rd.row(vec![t("OpeningBalances"), t("entity | kind(CASH/CRYPTO/LOAN) | ccy_or_asset | exchange | qty | unit_cost | amount | counterparty | as_of | memo. As-at cutover snapshot; balances against EQ:OPENING and seeds FIFO lots. (Empty in this demo — it starts from inception via the capital cash-in.)")]);
@@ -93,13 +93,13 @@ fn build_sheets() -> Vec<Sheet> {
     rd.row(vec![e()]);
     rd.header(header(&["Derived sheet", "Built by"]));
     for (s, by) in [
-        ("ChartOfAccounts / Journal / JournalLines / Lots", "macro (procedural posting + FIFO)"),
-        ("TrialBalance / Balances", "SQL: SUM(amount) per account, JOIN chart of accounts"),
-        ("ExchangeBalances", "SQL: GROUP BY entity, exchange, asset over Lots (your 'balances by coin per exchange')"),
-        ("Positions", "SQL: GROUP BY entity, asset over Lots"),
-        ("Loans", "SQL: outstanding LIAB:LOAN per entity"),
-        ("PnL / IncomeStatement / BalanceSheet", "SQL aggregates + IFRS derivation"),
-        ("Reconciliation", "macro: match each BankStatement line to its posted cash journal, then tie out statement vs ledger per entity+ccy"),
+        ("ChartOfAccounts / Journal / JournalLines / Lots", "VBA: procedural posting + FIFO"),
+        ("TrialBalance / Balances", "VBA: SUM(amount) per account"),
+        ("ExchangeBalances", "VBA: group by entity, exchange, asset over Lots (your 'balances by coin per exchange')"),
+        ("Positions", "VBA: group by entity, asset over Lots"),
+        ("Loans", "VBA: outstanding LIAB:LOAN per entity"),
+        ("PnL / IncomeStatement / BalanceSheet", "VBA aggregates + IFRS derivation"),
+        ("Reconciliation", "VBA: match each BankStatement line to its posted cash journal, then tie out statement vs ledger per entity+ccy"),
     ] {
         rd.row(vec![t(s), t(by)]);
     }
@@ -455,12 +455,16 @@ written by Excel itself, pick whichever path below fits you.
 3. Back in Excel: **Developer > Insert > Button**, assign it to macro `RunAll`.
 4. Click the button. Done.
 
-## How "uses SQL" works
-On RUN ALL the macros post the double-entry journals and FIFO lots, then open an
-**ADODB** connection (`Microsoft.ACE.OLEDB.12.0`) against the workbook itself and
-run `GROUP BY` / `JOIN` SQL to build the reports. If the ACE provider is not
-installed, the engine automatically falls back to equivalent in-VBA aggregation
-so RUN ALL still completes — the popup tells you which path ran.
+## 100% VBA — runs on just Excel
+The entire engine is VBA macros. On RUN ALL it posts the double-entry journals
+and FIFO lots, aggregates every report, and reconciles the bank lines — all in
+VBA, with **no database, no add-in, and no external provider** required. Nothing
+to install beyond Excel itself.
+
+(An optional SQL implementation of the reporting layer is included in
+`modReports` behind `USE_SQL = False`; flip it to `True` only if you specifically
+want the reports computed via the `Microsoft.ACE.OLEDB` provider. It is off by
+default so the workbook stays self-contained.)
 
 ## Verifying it matches the Rust engine
 With the shipped demo, entity **BVI** must show: realized **7497.5**, unrealized
