@@ -1,0 +1,15 @@
+[package]
+name = "crypto-accounting-excel"
+version = "0.1.0"
+edition = "2021"
+description = "Generates GravityLedger.xlsm — a single-file crypto double-entry accounting workbook (SQL + VBA macros), mirroring the pgaurabh4/crypto-accounting Rust engine."
+
+[dependencies]
+zip = { version = "0.6", default-features = false, features = ["deflate"] }
+
+[[bin]]
+name = "gen-xlsm"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 2
